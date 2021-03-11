@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QVBoxLayout
 
 ERROR_MSG = 'some error happened'
+NON_BINARY_ERROR_MSG = 'non binary expression'
 
 class PyCalcCtrl:
     """PyCalc Controller class."""
@@ -24,7 +25,7 @@ class PyCalcCtrl:
 
     def _calculateResult(self):
         """Evaluate expressions."""
-        result = self._evaluate(expression=self._view.displayText())
+        result = self._evaluate(expression=self._view.displayText(), mode=self._view.mode)
         self._view.setDisplayText(result)
 
     def _buildExpression(self, sub_exp):
@@ -110,7 +111,7 @@ class PyCalcUi(QMainWindow):
                    'bin/dec': (3, 5)
                   }
         else:
-            buttons = {'0': (0, 0), '1': (0, 1), 'C': (1, 0), '=': (1, 1), 'bin/dec': (1, 2)}
+            buttons = {'0': (0, 0), '1': (0, 1), 'C': (0, 2), '=': (1, 2), '/': (1, 0), '*': (1, 1), '+': (2, 0), '-': (2, 1), 'bin/dec': (2, 2)}
         # Create the buttons and add them to the grid layout
         for btnText, pos in buttons.items():
             self.buttons[btnText] = QPushButton(btnText)
@@ -130,7 +131,7 @@ class PyCalcUi(QMainWindow):
             self.mode = 0
             self.setFixedSize(400, 400)
         else:
-            self.setFixedSize(200, 200)
+            self.setFixedSize(300, 300)
             self.mode = 1
         self.clearLayout(self.buttonsLayout)
         self._createButtons()
@@ -148,11 +149,15 @@ class PyCalcUi(QMainWindow):
         """Clear the display."""
         self.setDisplayText('')
 
-def evaluateExpression(expression):
+def evaluateExpression(expression, mode=0):
     """Evaluate an expression."""
     try:
+        if mode == 1 and any([it in expression for it in ['2', '3', '4', '5', '6', '7', '8', '9']]):
+            result = NON_BINARY_ERROR_MSG
+            return result
         result = str(eval(expression, {}, {}))
-    except Exception:
+    except Exception as e:
+        print(str(e))
         result = ERROR_MSG
 
     return result
