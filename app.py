@@ -12,6 +12,10 @@ from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QVBoxLayout
 
 ERROR_MSG = 'some error happened'
+INVALID_INPUT = 'enter two numbers with operator between'
+
+from calculator import Calculator
+import re
 
 class PyCalcCtrl:
     """PyCalc Controller class."""
@@ -88,15 +92,15 @@ class PyCalcUi(QMainWindow):
                    '5': (1, 1),
                    '6': (1, 2),
                    '*': (1, 3),
-                   '(': (1, 4),
+                   '^': (1, 4),
                    '1': (2, 0),
                    '2': (2, 1),
                    '3': (2, 2),
                    '-': (2, 3),
-                   ')': (2, 4),
+                   '%': (2, 4),
                    '0': (3, 0),
                    '00': (3, 1),
-                   '.': (3, 2),
+                   '': (3, 2),
                    '+': (3, 3),
                    '=': (3, 4),
                   }
@@ -123,9 +127,27 @@ class PyCalcUi(QMainWindow):
 
 def evaluateExpression(expression):
     """Evaluate an expression."""
+    calculator = Calculator()
+    symbol_to_method = {
+            '*': calculator.mult, 
+            '+': calculator.add, 
+            '-': calculator.sub, 
+            '/': calculator.divide, 
+            '%': calculator.reminder, 
+            '^': calculator.pow
+            }
     try:
+        for symbol in symbol_to_method:
+            inputs = list(map(int, expression.split(symbol)))
+            if len(inputs) > 2:
+                return INVALID_INPUT
+            elif len(inputs) == 2:
+                return str(symbol_to_method[symbol](*inputs))
+        else:
+            return INVALID_INPUT
         result = str(eval(expression, {}, {}))
-    except Exception:
+    except Exception as e:
+        print(e)
         result = ERROR_MSG
 
     return result
