@@ -111,7 +111,16 @@ class PyCalcUi(QMainWindow):
                    'bin/dec': (3, 5)
                   }
         else:
-            buttons = {'0': (0, 0), '1': (0, 1), 'C': (0, 2), '=': (1, 2), '/': (1, 0), '*': (1, 1), '+': (2, 0), '-': (2, 1), 'bin/dec': (2, 2)}
+            buttons = {'0': (0, 0), 
+					'1': (0, 1), 
+					'C': (0, 2), 
+					'/': (1, 0), 
+					'*': (1, 1), 
+					'=': (1, 2), 
+					'+': (2, 0), 
+					'-': (2, 1), 
+					'bin/dec': (2, 2)
+					}
         # Create the buttons and add them to the grid layout
         for btnText, pos in buttons.items():
             self.buttons[btnText] = QPushButton(btnText)
