@@ -35,12 +35,17 @@ class PyCalcCtrl:
         expression = self._view.displayText() + sub_exp
         self._view.setDisplayText(expression)
 
+    def _changeMode(self):
+        self._view.changeMode()
+        self._connectSignals()
+
     def _connectSignals(self):
         """Connect signals and slots."""
         for btnText, btn in self._view.buttons.items():
-            if btnText not in {'=', 'C'}:
+            if btnText not in {'=', 'C', 'bin/dec'}:
                 btn.clicked.connect(partial(self._buildExpression, btnText))
 
+        self._view.buttons['bin/dec'].clicked.connect(self._changeMode)
         self._view.buttons['='].clicked.connect(self._calculateResult)
         self._view.display.returnPressed.connect(self._calculateResult)
         self._view.buttons['C'].clicked.connect(self._view.clearDisplay)
@@ -51,9 +56,10 @@ class PyCalcUi(QMainWindow):
     def __init__(self):
         """View initializer."""
         super().__init__()
+        self.mode = 0
         # Set some main window's properties
         self.setWindowTitle('PyCalc')
-        self.setFixedSize(500, 500)
+        self.setFixedSize(400, 400)
         self.generalLayout = QVBoxLayout()
         # Set the central widget
         self._centralWidget = QWidget(self)
@@ -77,9 +83,11 @@ class PyCalcUi(QMainWindow):
     def _createButtons(self):
         """Create the buttons."""
         self.buttons = {}
-        buttonsLayout = QGridLayout()
+        self.buttonsLayout = QGridLayout()
+
         # Button text | position on the QGridLayout
-        buttons = {'7': (0, 0),
+        if self.mode == 0:
+            buttons = {'7': (0, 0),
                    '8': (0, 1),
                    '9': (0, 2),
                    '/': (0, 3),
@@ -99,14 +107,33 @@ class PyCalcUi(QMainWindow):
                    '.': (3, 2),
                    '+': (3, 3),
                    '=': (3, 4),
+                   'bin/dec': (3, 5)
                   }
+        else:
+            buttons = {'0': (0, 0), '1': (0, 1), 'C': (1, 0), '=': (1, 1), 'bin/dec': (1, 2)}
         # Create the buttons and add them to the grid layout
         for btnText, pos in buttons.items():
             self.buttons[btnText] = QPushButton(btnText)
             self.buttons[btnText].setFixedSize(60, 60)
-            buttonsLayout.addWidget(self.buttons[btnText], pos[0], pos[1])
+            self.buttonsLayout.addWidget(self.buttons[btnText], pos[0], pos[1])
         # Add buttonsLayout to the general layout
-        self.generalLayout.addLayout(buttonsLayout)
+        self.generalLayout.addLayout(self.buttonsLayout)
+    
+    def clearLayout(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+    
+    def changeMode(self):
+        if self.mode == 1:
+            self.mode = 0
+            self.setFixedSize(400, 400)
+        else:
+            self.setFixedSize(200, 200)
+            self.mode = 1
+        self.clearLayout(self.buttonsLayout)
+        self._createButtons()
 
     def setDisplayText(self, text):
         """Set display's text."""
